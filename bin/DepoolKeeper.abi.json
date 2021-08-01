@@ -1,0 +1,70 @@
+{
+	"ABI version": 2,
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"depoolFee","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "addOrdinaryStake",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"initiatorAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawPart",
+			"inputs": [
+				{"name":"amount","type":"uint128"},
+				{"name":"initiatorAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onRoundComplete",
+			"inputs": [
+				{"name":"roundId","type":"uint64"},
+				{"name":"reward","type":"uint64"},
+				{"name":"ordinaryStake","type":"uint64"},
+				{"name":"vestingStake","type":"uint64"},
+				{"name":"lockStake","type":"uint64"},
+				{"name":"reinvest","type":"bool"},
+				{"name":"reason","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "receiveAnswer",
+			"inputs": [
+				{"name":"errcode","type":"uint32"},
+				{"name":"comment","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTransfer",
+			"inputs": [
+				{"name":"source","type":"address"},
+				{"name":"amount","type":"uint128"}
+			],
+			"outputs": [
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"_depoolAddress","type":"address"},
+		{"key":2,"name":"_rootAddress","type":"address"}
+	],
+	"events": [
+	]
+}
