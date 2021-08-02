@@ -1,0 +1,76 @@
+{
+	"ABI version": 2,
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"ownerAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "fakeMint",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "addOrdinaryStake",
+			"inputs": [
+				{"name":"stake","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "withdrawPart",
+			"inputs": [
+				{"name":"withdrawValue","type":"uint64"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getOwnerAddress",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "callOwnerAddress",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "changeOwner",
+			"inputs": [
+				{"name":"newOwnerAddress","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "callChangeOwner",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"},
+				{"name":"newOwnerAddress","type":"address"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+	]
+}
