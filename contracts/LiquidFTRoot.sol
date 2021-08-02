@@ -287,7 +287,7 @@ contract LiquidFTRoot is IOwnable, ILiquidFTRoot
     
     //========================================
     //
-    function addOrdinaryStake(address depoolAddress, address notifyAddress, TvmCell body) external
+    function addOrdinaryStake(address depoolAddress, address notifyAddress, TvmCell body) external override
     {
         uint128 amountWithoutFees = msg.value - _returnableFee - _keepersList[depoolAddress].depoolFee;
         require(_keepersList.exists(depoolAddress),                              ERROR_DEPOOL_IS_NOT_ADDED);

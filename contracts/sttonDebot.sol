@@ -12,6 +12,7 @@ pragma AbiHeader expire;
 //================================================================================
 //
 import "../interfaces/ILiquidFTRoot.sol";
+import "../interfaces/ILiquidFTWallet.sol";
 import "../interfaces/IDebot.sol";
 import "../interfaces/IUpgradable.sol";
 
@@ -21,6 +22,14 @@ contract AuctionDebot is Debot, Upgradable
 {
     address _sttonRtwAddress;
     address _msigAddress;
+
+    address _walletAddress;
+    uint128 _walletBalance;
+    int8    _walletAccType;
+
+    address _depoolAddress;
+    uint128 _depositAmount;
+    uint128 _withdrawAmount;
 
     uint128 constant ATTACH_VALUE = 0.5 ton;
 
@@ -144,6 +153,57 @@ contract AuctionDebot is Debot, Upgradable
     {
         index; // shut a warning
 
+        // Reset variables
+        delete _walletAddress;
+        delete _walletBalance;
+        delete _walletAccType;
+
+        ILiquidFTRoot(_sttonRtwAddress).getWalletAddress{
+                        abiVer: 2,
+                        extMsg: true,
+                        sign: false,
+                        time: uint64(now),
+                        expire: 0,
+                        pubkey: _emptyPk,
+                        callbackId: tvm.functionId(_checkBalance_2),
+                        onErrorId:  0
+                        }(_msigAddress);
+    }
+
+    function _checkBalance_2(address value) public 
+    {
+        _walletAddress = value;
+        Sdk.getAccountType(tvm.functionId(_checkBalance_3), _walletAddress);
+    }
+
+    function _checkBalance_3(int8 acc_type) public
+    {
+        _walletAccType = acc_type;
+        if(_walletAccType == -1 || _walletAccType == 0)
+        {
+            _checkBalance_4(0);
+        }
+        else
+        {
+            ILiquidFTWallet(_walletAddress).getBalance{
+                        abiVer: 2,
+                        extMsg: true,
+                        sign: false,
+                        time: uint64(now),
+                        expire: 0,
+                        pubkey: _emptyPk,
+                        callbackId: tvm.functionId(_checkBalance_4),
+                        onErrorId:  0
+                        }();
+        }
+    }
+
+    function _checkBalance_4(uint128 amount) public
+    {
+        _walletBalance = amount;
+        Terminal.print(0, format("Wallet Address: {:064x}\nBalance: {:t}", _walletAddress, _walletBalance));
+
+        mainMenu(0);
     }
 
     //========================================
@@ -156,6 +216,34 @@ contract AuctionDebot is Debot, Upgradable
     {
         index; // shut a warning
 
+        delete _depoolAddress;
+        delete _depositAmount;
+
+        AmountInput.get(tvm.functionId(_deposit_2), "Enter amount of TON Crystals to deposit: ", 9, 101000000000, 999999999999999999999999999999);
+    }
+
+    function _deposit_2(uint128 value) public
+    {
+        _depositAmount = value;
+        AddressInput.get(tvm.functionId(_deposit_3), "Enter desired DePool address: ");
+    }
+
+    function _deposit_3(address value) public
+    {
+        _depoolAddress = value;
+
+        TvmCell empty;
+        TvmCell body = tvm.encodeBody(ILiquidFTRoot.addOrdinaryStake, _depoolAddress, addressZero, empty);
+        _sendTransact(_msigAddress, _sttonRtwAddress, body, _depositAmount + 1 ton); // TODO: change 1 ton to some dynamic value
+        _deposit_4(0);
+    }
+    
+    function _deposit_4(uint32 index) public
+    {
+        index; // shut a warning
+        
+        Terminal.print(0, format("Deposited {:t} TON Crystals. Please check your Token Wallet now.", _depositAmount));
+        mainMenu(0);
     }
 
     //========================================
@@ -168,6 +256,79 @@ contract AuctionDebot is Debot, Upgradable
     {
         index; // shut a warning
 
+        // Reset variables
+        delete _walletAddress;
+        delete _walletBalance;
+        delete _walletAccType;
+
+        ILiquidFTRoot(_sttonRtwAddress).getWalletAddress{
+                        abiVer: 2,
+                        extMsg: true,
+                        sign: false,
+                        time: uint64(now),
+                        expire: 0,
+                        pubkey: _emptyPk,
+                        callbackId: tvm.functionId(_withdraw_2),
+                        onErrorId:  0
+                        }(_msigAddress);
+    }
+
+    function _withdraw_2(address value) public 
+    {
+        _walletAddress = value;
+        Sdk.getAccountType(tvm.functionId(_withdraw_3), _walletAddress);
+    }
+
+    function _withdraw_3(int8 acc_type) public
+    {
+        _walletAccType = acc_type;
+        if(_walletAccType == -1 || _walletAccType == 0)
+        {
+            Terminal.print(0, "Token Wallet balance is 0, nothing to withdraw.");
+            mainMenu(0);
+        }
+        else
+        {
+            ILiquidFTWallet(_walletAddress).getBalance{
+                        abiVer: 2,
+                        extMsg: true,
+                        sign: false,
+                        time: uint64(now),
+                        expire: 0,
+                        pubkey: _emptyPk,
+                        callbackId: tvm.functionId(_withdraw_4),
+                        onErrorId:  0
+                        }();
+        }
+    }
+    
+    function _withdraw_4(uint128 amount) public
+    {
+        _walletBalance = amount;
+        if(_walletBalance == 0)
+        {
+            Terminal.print(0, "Token Wallet balance is 0, nothing to withdraw.");
+            mainMenu(0);
+        }
+        else
+        {
+            AmountInput.get(tvm.functionId(_withdraw_5), "Enter amount of Tokens return (in exchange to TON Crystals): ", 9, 1, _walletBalance);
+        }
+    }
+
+    function _withdraw_5(uint128 value) public
+    {
+        _withdrawAmount = value;
+        TvmCell body = tvm.encodeBody(ILiquidFTWallet.burn, _withdrawAmount);
+        _sendTransact(_msigAddress, _walletAddress, body, _depositAmount + 1 ton); // TODO: change 1 ton to some dynamic value
+    }
+    
+    function _withdraw_6(uint32 index) public
+    {
+        index; // shut a warning
+        
+        Terminal.print(0, format("{:t} Tokens withdrawn. Please check your Multisig now.", _withdrawAmount));
+        mainMenu(0);
     }
 
 }

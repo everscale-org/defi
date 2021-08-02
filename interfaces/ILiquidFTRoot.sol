@@ -71,8 +71,9 @@ interface ILiquidFTRoot
     function callCreateWallet(address ownerAddress, address notifyOnReceiveAddress, uint128 tokensAmount) external responsible returns (address);
 
     //========================================
-    //
-    function onRoundComplete(address depoolAddress, uint128 totalAmount) external;
+    // st-ton functions
+    function addOrdinaryStake(address depoolAddress, address notifyAddress, TvmCell body) external;
+    function onRoundComplete (address depoolAddress, uint128 totalAmount)                 external;
 }
 
 //================================================================================
